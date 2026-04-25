@@ -66,7 +66,17 @@ export const AREAS = [
   'Marketing',
   'Seminuevos',
 ];
-
+// ── Áreas / Departamentos del sistema ──────────────────────
+// Estas son las áreas estándar para Índice Automotriz.
+// En v2.1 se podrán customizar por empresa en config.
+export const AREAS = [
+  'Ventas',
+  'Servicio',
+  'Administrativo',
+  'Refacciones',
+  'Marketing',
+  'Seminuevos',
+];
 // ── Estados ───────────────────────────────────────────────
 export const ESTADOS = { ACTIVA: 'activa', CANCELADA: 'cancelada' };
 
