@@ -1,0 +1,63 @@
+/* ============================================================
+   VOLKSWAGEN ÍNDICE RH — tokens.css
+   Sistema de diseño: Light ejecutivo / VW brand
+   ============================================================ */
+
+:root {
+  /* ── Colores primarios VW ─────────────────────────── */
+  --primary:        #1B3FAB;
+  --primary-lite:   rgba(27, 63, 171, 0.10);
+  --primary-glow:   rgba(27, 63, 171, 0.20);
+  --secondary:      #3B5FCC;
+  --accent:         #4F7FFF;
+
+  /* ── Fondos ───────────────────────────────────────── */
+  --bg:       #F4F6FB;
+  --surface:  #FFFFFF;
+  --surface2: #F8F9FC;
+  --surface3: #EEF1F8;
+
+  /* ── Texto ────────────────────────────────────────── */
+  --text1: #0F1724;
+  --text2: #3D4F6B;
+  --text3: #7A8BA8;
+
+  /* ── Bordes ───────────────────────────────────────── */
+  --border:  #E2E8F0;
+  --border2: #C8D4E8;
+  --border3: rgba(27,63,171,.25);
+
+  /* ── Estados ─────────────────────────────────────── */
+  --success:       #059669;
+  --success-lite:  rgba(5,150,105,.10);
+  --warning:       #D97706;
+  --warning-lite:  rgba(217,119,6,.10);
+  --error:         #DC2626;
+  --error-lite:    rgba(220,38,38,.10);
+  --info:          #0284C7;
+  --info-lite:     rgba(2,132,199,.10);
+
+  /* ── Gravedades ──────────────────────────────────── */
+  --grav-baja:    #059669;
+  --grav-media:   #D97706;
+  --grav-alta:    #DC2626;
+  --grav-critica: #991B1B;
+
+  /* ── Tipografía ──────────────────────────────────── */
+  --font-display: 'DM Sans', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+
+  /* ── Espaciado ───────────────────────────────────── */
+  --radius:    14px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --shadow:    0 1px 4px rgba(15,23,42,.08), 0 4px 16px rgba(15,23,42,.06);
+  --shadow-lg: 0 4px 24px rgba(15,23,42,.12);
+
+  /* ── Layout ──────────────────────────────────────── */
+  --topbar-h:      60px;
+  --bottom-nav-h:  68px;
+  --max-content:   900px;
+}

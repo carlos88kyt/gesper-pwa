@@ -1,0 +1,149 @@
+/* ============================================================
+   base.css — reset y estilos globales
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { height: 100%; font-size: 16px; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text1);
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app { height: 100dvh; display: flex; flex-direction: column; position: relative; }
+
+/* ── SPA sections ─────────────────────────────────────────── */
+.spa-section { display: none; }
+.spa-section.active { display: block; }
+
+/* ── Main layout ─────────────────────────────────────────── */
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+.main-layout.hidden { display: none; }
+
+/* ── Main content scroll ─────────────────────────────────── */
+#main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: var(--topbar-h);
+  padding-bottom: calc(var(--bottom-nav-h) + 16px);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+#main-content::-webkit-scrollbar { width: 4px; }
+#main-content::-webkit-scrollbar-track { background: transparent; }
+#main-content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* ── Section padding ─────────────────────────────────────── */
+.sec-wrap {
+  padding: 20px 16px;
+  max-width: var(--max-content);
+  margin: 0 auto;
+  animation: fadeUp .3s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Desktop centering ───────────────────────────────────── */
+@media (min-width: 768px) {
+  .spa-section.active { display: flex; justify-content: center; }
+  .sec-wrap { padding: 28px 24px; }
+}
+
+/* ── Topbar ──────────────────────────────────────────────── */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(15,23,42,.08);
+}
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 16px;
+  max-width: var(--max-content);
+  margin: 0 auto;
+}
+.topbar-brand { display: flex; align-items: center; gap: 10px; }
+.vw-logo-sm {
+  width: 36px; height: 36px;
+  background: var(--primary);
+  border-radius: 50%;
+  padding: 5px;
+  flex-shrink: 0;
+}
+.vw-logo-sm svg { width: 100%; height: 100%; }
+.topbar-titles { display: flex; flex-direction: column; gap: 1px; }
+.topbar-title { font-size: 13px; font-weight: 700; letter-spacing: .02em; color: var(--text1); }
+.topbar-sub { font-size: 11px; color: var(--text3); font-weight: 500; }
+.topbar-actions { display: flex; align-items: center; gap: 6px; }
+.topbar-btn {
+  width: 36px; height: 36px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.topbar-btn:hover { color: var(--text1); border-color: var(--border2); }
+
+/* ── Bottom Nav ──────────────────────────────────────────── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--bottom-nav-h);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.nav-btn {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px;
+  flex: 1;
+  height: 100%;
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  transition: color .2s;
+  padding: 0;
+}
+.nav-btn svg { transition: transform .2s; }
+.nav-btn.active { color: var(--secondary); }
+.nav-btn.active svg { transform: scale(1.1); }
+.nav-btn:hover { color: var(--text2); }
+
+/* Admin-only nav item hidden for gerentes */
+.nav-btn-admin.hidden-role { display: none; }
+
+/* ── Hidden utility ──────────────────────────────────────── */
+.hidden { display: none !important; }

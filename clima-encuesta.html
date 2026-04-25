@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Evaluación de Clima Laboral — VW Índice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:   #1B3FAB;
+      --cyan:   #1B3FAB;
+      --bg:     #F4F6FB;
+      --white:  #ffffff;
+      --border: #E2E8F0;
+      --text1:  #0F1724;
+      --text2:  #3D4F6B;
+      --text3:  #7A8BA8;
+      --ok:     #059669;
+      --warn:   #D97706;
+      --err:    #DC2626;
+      --radius: 14px;
+      --shadow: 0 2px 12px rgba(27,63,171,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text1); min-height: 100vh; }
+
+    /* ── Header ── */
+    .enc-header {
+      background: var(--navy);
+      padding: 20px 24px 24px;
+      text-align: center;
+    }
+    .enc-header-logo {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-bottom: 10px;
+    }
+    .vw-badge {
+      width: 40px; height: 40px; background: white; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px; color: var(--navy); letter-spacing: -.5px;
+    }
+    .enc-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; color: white; font-weight: 700;
+    }
+    .enc-header p { font-size: 13px; color: rgba(255,255,255,.7); margin-top: 4px; }
+    .enc-progress-bar {
+      height: 4px; background: rgba(255,255,255,.2);
+      border-radius: 99px; margin-top: 16px; overflow: hidden;
+    }
+    .enc-progress-fill {
+      height: 100%; background: var(--navy);
+      border-radius: 99px; transition: width .4s ease;
+    }
+    .enc-progress-label {
+      font-size: 11px; color: rgba(255,255,255,.6);
+      text-align: right; margin-top: 4px;
+    }
+
+    /* ── Container ── */
+    .enc-container { max-width: 640px; margin: 0 auto; padding: 24px 16px 80px; }
+
+    /* ── Screen ── */
+    .enc-screen { display: none; }
+    .enc-screen.active { display: block; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Card ── */
+    .enc-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .enc-section-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(0,30,80,.08); border-radius: 99px;
+      padding: 4px 12px; font-size: 11px; font-weight: 600;
+      color: var(--navy); text-transform: uppercase; letter-spacing: .05em;
+      margin-bottom: 10px;
+    }
+    .enc-section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px; font-weight: 700; color: var(--text1);
+      margin-bottom: 6px;
+    }
+    .enc-section-desc { font-size: 13px; color: var(--text3); margin-bottom: 20px; line-height: 1.5; }
+
+    /* ── Question ── */
+    .enc-question { margin-bottom: 22px; }
+    .enc-question-text {
+      font-size: 14px; font-weight: 500; color: var(--text1);
+      line-height: 1.5; margin-bottom: 12px;
+    }
+    .enc-question-text.risk { color: var(--text1); }
+    .enc-question-text.risk::before {
+      content: '⚠ ';
+      color: var(--warn);
+    }
+
+    /* Likert scale */
+    .likert-scale {
+      display: flex; gap: 8px; align-items: flex-end;
+    }
+    .likert-option { flex: 1; text-align: center; cursor: pointer; }
+    .likert-btn {
+      width: 100%; aspect-ratio: 1;
+      max-width: 52px; min-width: 36px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      font-size: 14px; font-weight: 600;
+      color: var(--text3);
+      cursor: pointer; transition: all .2s;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 4px;
+    }
+    .likert-btn:hover { border-color: var(--navy); color: var(--navy); }
+    .likert-btn.selected { background: var(--navy); border-color: var(--navy); color: white; }
+    .likert-label { font-size: 10px; color: var(--text3); line-height: 1.2; }
+
+    /* Textarea */
+    .enc-textarea {
+      width: 100%; border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      color: var(--text1); background: var(--bg);
+      resize: vertical; min-height: 80px;
+      transition: border-color .2s;
+    }
+    .enc-textarea:focus { outline: none; border-color: var(--cyan); }
+    .enc-textarea::placeholder { color: var(--text3); }
+    .enc-optional { font-size: 11px; color: var(--text3); margin-top: 4px; font-style: italic; }
+
+    /* Select */
+    .enc-select {
+      width: 100%; border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 12px 40px 12px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      color: var(--text1); background: var(--bg);
+      appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8ba8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+      transition: border-color .2s;
+    }
+    .enc-select:focus { outline: none; border-color: var(--cyan); }
+    .field-group { display: flex; flex-direction: column; gap: 8px; }
+    .field-label { font-size: 13px; font-weight: 600; color: var(--text2); }
+
+    /* ── Navigation buttons ── */
+    .enc-nav {
+      display: flex; gap: 12px; margin-top: 8px;
+    }
+    .btn-enc-primary {
+      flex: 1; background: var(--navy); color: white;
+      border: none; border-radius: 12px;
+      padding: 15px 20px; font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: all .2s; display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+    }
+    .btn-enc-primary:hover { background: #162f82; }
+    .btn-enc-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-enc-secondary {
+      background: var(--bg); color: var(--text2);
+      border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 15px 18px; font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 500; cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-enc-secondary:hover { border-color: var(--navy); color: var(--navy); }
+
+    /* ── Welcome screen ── */
+    .enc-welcome-icon {
+      width: 72px; height: 72px; background: rgba(0,30,80,.08);
+      border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; margin: 0 auto 20px; font-size: 36px;
+    }
+    .enc-welcome h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px; font-weight: 700; color: var(--text1);
+      text-align: center; margin-bottom: 12px;
+    }
+    .enc-welcome p { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 12px; }
+    .enc-anon-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(5,150,105,.08); border: 1px solid rgba(5,150,105,.2);
+      border-radius: 10px; padding: 10px 14px; margin: 16px 0;
+    }
+    .enc-anon-badge span { font-size: 13px; color: var(--ok); font-weight: 500; }
+
+    /* ── Closed screen ── */
+    .enc-closed {
+      text-align: center; padding: 40px 20px;
+    }
+    .enc-closed-icon { font-size: 56px; margin-bottom: 16px; }
+    .enc-closed h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px; color: var(--text1); margin-bottom: 10px;
+    }
+    .enc-closed p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+    /* ── Confirmation screen ── */
+    .enc-confirm { text-align: center; padding: 20px 0; }
+    .enc-confirm-check {
+      width: 80px; height: 80px; background: rgba(5,150,105,.1);
+      border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; margin: 0 auto 20px; font-size: 40px;
+    }
+    .enc-confirm h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px; font-weight: 700; color: var(--text1); margin-bottom: 8px;
+    }
+    .enc-confirm p { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
+    .enc-code-box {
+      background: var(--navy); border-radius: 16px;
+      padding: 24px 20px; margin: 24px 0;
+    }
+    .enc-code-label { font-size: 12px; color: rgba(255,255,255,.6); margin-bottom: 8px; letter-spacing: .08em; text-transform: uppercase; }
+    .enc-code-value {
+      font-size: 42px; font-weight: 700; color: white;
+      letter-spacing: 6px; font-family: 'DM Mono', monospace, 'DM Sans';
+    }
+    .enc-code-instruction {
+      font-size: 13px; color: rgba(255,255,255,.7);
+      margin-top: 12px; line-height: 1.5;
+    }
+
+    /* ── Validation error ── */
+    .enc-error {
+      font-size: 12px; color: var(--err); margin-top: 4px; display: none;
+    }
+    .enc-question.has-error .enc-error { display: block; }
+    .enc-question.has-error .likert-btn { border-color: rgba(220,38,38,.3); }
+
+    /* ── Loading ── */
+    .enc-loading {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 60px 20px; gap: 16px;
+    }
+    .enc-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--navy);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Alerts ── */
+    .enc-alert {
+      padding: 12px 16px; border-radius: 10px;
+      font-size: 13px; margin-bottom: 16px; line-height: 1.5;
+    }
+    .enc-alert-warn { background: rgba(217,119,6,.1); border: 1px solid rgba(217,119,6,.2); color: var(--warn); }
+
+    @media (max-width: 400px) {
+      .likert-btn { min-width: 30px; font-size: 13px; }
+      .enc-section-title { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="enc-header" class="enc-header">
+  <div class="enc-header-logo">
+    <div class="vw-badge">VW</div>
+    <div style="text-align:left">
+      <div style="color:white;font-weight:600;font-size:14px">Índice Automotriz</div>
+      <div style="color:rgba(255,255,255,.6);font-size:11px">Piedras Negras, Coahuila</div>
+    </div>
+  </div>
+  <h1>Evaluación de Clima Laboral</h1>
+  <p id="enc-subtitle">Responde de forma anónima y confidencial</p>
+  <div class="enc-progress-bar" id="enc-pb-wrap" style="display:none">
+    <div class="enc-progress-fill" id="enc-pb" style="width:0%"></div>
+  </div>
+  <div class="enc-progress-label" id="enc-pb-label" style="display:none"></div>
+</div>
+
+<div class="enc-container">
+
+  <!-- LOADING -->
+  <div id="screen-loading" class="enc-screen active">
+    <div class="enc-loading">
+      <div class="enc-spinner"></div>
+      <p style="color:var(--text3);font-size:14px">Verificando periodo activo…</p>
+    </div>
+  </div>
+
+  <!-- CERRADA -->
+  <div id="screen-closed" class="enc-screen">
+    <div class="enc-card enc-closed">
+      <div class="enc-closed-icon">🔒</div>
+      <h2>Periodo cerrado</h2>
+      <p id="closed-msg">No hay una evaluación activa en este momento. Contacta a tu administrador para más información.</p>
+    </div>
+  </div>
+
+  <!-- YA COMPLETADA -->
+  <div id="screen-duplicate" class="enc-screen">
+    <div class="enc-card enc-closed">
+      <div class="enc-closed-icon">✅</div>
+      <h2>Ya registraste tu respuesta</h2>
+      <p>En esta sesión ya completaste la evaluación. Si crees que es un error, usa otro navegador o contacta al administrador.</p>
+    </div>
+  </div>
+
+  <!-- BIENVENIDA -->
+  <div id="screen-welcome" class="enc-screen">
+    <div class="enc-card enc-welcome">
+      <div class="enc-welcome-icon">📋</div>
+      <h2>Evaluación de Clima Laboral</h2>
+      <p>Esta encuesta busca conocer tu experiencia real en la agencia. Tus respuestas ayudarán a identificar áreas de mejora para todo el equipo.</p>
+      <div class="enc-anon-badge">
+        <span>🔒</span>
+        <span><strong>Totalmente anónimo.</strong> No se guarda ningún dato que te identifique. Solo ves tus resultados agrupados.</span>
+      </div>
+      <p>La encuesta toma aproximadamente <strong>10–15 minutos</strong>. Puedes pausarla y continuar en la misma sesión si necesitas.</p>
+
+      <div style="margin-top:20px;display:flex;flex-direction:column;gap:14px">
+        <div class="field-group">
+          <label class="field-label">Departamento</label>
+          <select id="sel-depto" class="enc-select">
+            <option value="">— Selecciona tu área —</option>
+            <option value="ventas">Ventas &amp; Mercadotecnia</option>
+            <option value="servicio">Servicio</option>
+            <option value="seminuevos">Seminuevos</option>
+            <option value="administrativos">Administrativos</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Puesto</label>
+          <select id="sel-puesto" class="enc-select">
+            <option value="">— Selecciona tu puesto —</option>
+            <option value="colaborador">Colaborador / Operativo</option>
+            <option value="gerente">Gerente / Supervisor</option>
+          </select>
+        </div>
+        <div id="welcome-error" class="enc-alert enc-alert-warn" style="display:none">
+          Por favor selecciona tu departamento y puesto para continuar.
+        </div>
+        <button class="btn-enc-primary" id="btn-start">
+          Comenzar evaluación →
+        </button>
+      </div>
+      <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:16px;line-height:1.5">
+        Responsable: Lic. Mónica Alejandra González González<br>
+        <a href="mailto:alejandra.gonzalez@vw-indice.com.mx" style="color:var(--text3)">alejandra.gonzalez@vw-indice.com.mx</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- SECCIONES (1–8) -->
+  <div id="screen-survey" class="enc-screen">
+    <div id="survey-section-container"></div>
+    <div class="enc-nav" id="survey-nav">
+      <button class="btn-enc-secondary" id="btn-prev">← Anterior</button>
+      <button class="btn-enc-primary" id="btn-next">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- CONFIRMACIÓN FINAL -->
+  <div id="screen-confirm" class="enc-screen">
+    <div class="enc-card enc-confirm">
+      <div class="enc-confirm-check">✅</div>
+      <h2>¡Gracias por participar!</h2>
+      <p>Tu respuesta ha sido registrada de forma anónima. Toma una captura de pantalla de este código y envíala al administrador como evidencia de tu participación.</p>
+      <div class="enc-code-box">
+        <div class="enc-code-label">Tu código de evidencia</div>
+        <div class="enc-code-value" id="confirm-code">VW-XXXX</div>
+        <div class="enc-code-instruction">📸 Toma una captura de pantalla o foto y envíala a:<br><strong>Lic. Alejandra González</strong></div>
+      </div>
+      <p style="font-size:13px;color:var(--text3);line-height:1.6">
+        Tus respuestas serán analizadas de forma grupal. Nunca se compartirán individualmente con supervisores o jefes de área.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+// ══════════════════════════════════════════════════════════
+// FIREBASE
+// ══════════════════════════════════════════════════════════
+import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, doc, addDoc, query,
+         where, getDocs, Timestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyCupPAAdFc-rgKPboLS4GojJN2yL92_SvY",
+  authDomain:        "vw-indice-rh.firebaseapp.com",
+  projectId:         "vw-indice-rh",
+  storageBucket:     "vw-indice-rh.firebasestorage.app",
+  messagingSenderId: "214282885920",
+  appId:             "1:214282885920:web:d29cabb2cd59c5ec79d545"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// ══════════════════════════════════════════════════════════
+// PREGUNTAS
+// ══════════════════════════════════════════════════════════
+const SECCIONES = [
+  {
+    id: 's1', num: 1, emoji: '👤',
+    title: 'Liderazgo y Supervisión',
+    desc: 'Las siguientes preguntas se refieren a tu relación con tu jefe o supervisor directo.',
+    preguntas: [
+      { id:'l1', text:'Mi supervisor(a) directo/a me da retroalimentación útil sobre mi desempeño de manera regular.', tipo:'likert' },
+      { id:'l2', text:'Las decisiones de mi jefe/a son consistentes — aplica las mismas reglas para todos los miembros del equipo.', tipo:'likert' },
+      { id:'l3', text:'Cuando cometo un error, mi supervisor(a) lo aborda de manera constructiva y en privado.', tipo:'likert' },
+      { id:'l4', text:'Siento que algunas personas en mi área reciben trato preferencial sin que haya una razón laboral clara.', tipo:'likert', riesgo:true },
+      { id:'l5', text:'Mi jefe/a escucha mis sugerencias o inquietudes relacionadas con el trabajo.', tipo:'likert' },
+      { id:'l6', text:'Si pudieras cambiar algo en la forma de liderar de tu jefe directo, ¿qué cambiarías?', tipo:'abierta' },
+      { id:'l7', text:'Cuando hay problemas en tu área, ¿cómo responde tu supervisor/a? ¿Qué funciona y qué no?', tipo:'abierta' },
+    ]
+  },
+  {
+    id: 's2', num: 2, emoji: '💬',
+    title: 'Comunicación Interna',
+    desc: 'Evalúa cómo fluye la información dentro de tu área y en la agencia en general.',
+    preguntas: [
+      { id:'c1', text:'Recibo la información necesaria para hacer bien mi trabajo antes de que la necesite.', tipo:'likert' },
+      { id:'c2', text:'Con frecuencia me entero de cambios importantes por rumores o compañeros, en lugar de por comunicación oficial.', tipo:'likert', riesgo:true },
+      { id:'c3', text:'Puedo expresar una opinión diferente a la de mi jefe/a sin temor a consecuencias negativas.', tipo:'likert' },
+      { id:'c4', text:'La comunicación entre los diferentes departamentos de la agencia es fluida y efectiva.', tipo:'likert' },
+      { id:'c5', text:'Las instrucciones que recibo son claras y suficientes para completar mis tareas correctamente.', tipo:'likert' },
+      { id:'c6', text:'¿Hay temas que nadie habla abiertamente pero que afectan al equipo? (Sin necesidad de dar nombres.)', tipo:'abierta' },
+      { id:'c7', text:'¿Cómo mejorarías los canales de comunicación dentro de tu área o entre departamentos?', tipo:'abierta' },
+    ]
+  },
+  {
+    id: 's3', num: 3, emoji: '⚖️',
+    title: 'Carga de Trabajo y Estrés',
+    desc: 'Comparte cómo percibes la distribución del trabajo y el manejo del estrés en tu área.',
+    preguntas: [
+      { id:'w1', text:'La cantidad de trabajo asignada es manejable en una semana típica sin necesitar trabajar en exceso.', tipo:'likert' },
+      { id:'w2', text:'Cuento con las herramientas y recursos necesarios para realizar mi trabajo de manera eficiente.', tipo:'likert' },
+      { id:'w3', text:'Hay personas en mi área con significativamente menos carga de trabajo que otras, sin justificación clara.', tipo:'likert', riesgo:true },
+      { id:'w4', text:'Al terminar mi jornada, logro desconectarme del trabajo y descansar adecuadamente.', tipo:'likert' },
+      { id:'w5', text:'Los plazos y metas que se me asignan son realistas con el tiempo y recursos disponibles.', tipo:'likert' },
+      { id:'w6', text:'¿Hay tareas que sientes que no corresponden a tu puesto o que se te han asignado de más?', tipo:'abierta' },
+      { id:'w7', text:'¿Qué cambios en la organización del trabajo reducirían el estrés en tu área?', tipo:'abierta' },
+    ]
+  },
+  {
+    id: 's4', num: 4, emoji: '🤝',
+    title: 'Ambiente Laboral',
+    desc: 'Reflexiona sobre las relaciones entre compañeros y el ambiente general en tu área de trabajo.',
+    preguntas: [
+      { id:'a1', text:'Las relaciones entre mis compañeros son respetuosas y colaborativas en general.', tipo:'likert' },
+      { id:'a2', text:'En mi área existen subgrupos o "favoritos" que generan división o tensión entre el equipo.', tipo:'likert', riesgo:true },
+      { id:'a3', text:'Cuando surge un conflicto entre compañeros, generalmente se resuelve de manera madura sin escalar.', tipo:'likert' },
+      { id:'a4', text:'Me siento parte del equipo — mis ideas y participación son valoradas por mis compañeros.', tipo:'likert' },
+      { id:'a5', text:'El ambiente general en mi área me motiva a venir a trabajar cada día.', tipo:'likert' },
+      { id:'a6', text:'Si pudieras cambiar UNA cosa del ambiente o cultura de tu área, ¿cuál sería?', tipo:'abierta' },
+      { id:'a7', text:'¿Hay situaciones en tu equipo que la dirección debería conocer pero que nadie habla en voz alta?', tipo:'abierta' },
+    ]
+  },
+  {
+    id: 's5', num: 5, emoji: '🚀',
+    title: 'Reconocimiento y Crecimiento',
+    desc: 'Evalúa las oportunidades de desarrollo profesional y el reconocimiento en la agencia.',
+    preguntas: [
+      { id:'g1', text:'Cuando hago bien mi trabajo, recibo reconocimiento o retroalimentación positiva de mis superiores.', tipo:'likert' },
+      { id:'g2', text:'Veo posibilidades reales de crecimiento o ascenso dentro de esta agencia si me desempeño bien.', tipo:'likert' },
+      { id:'g3', text:'Los ascensos y oportunidades de crecimiento dependen más del desempeño que de relaciones personales con los jefes.', tipo:'likert', riesgo:true },
+      { id:'g4', text:'La empresa invierte en mi desarrollo profesional mediante capacitaciones o certificaciones relevantes.', tipo:'likert' },
+      { id:'g5', text:'Mi compensación (salario + beneficios) refleja de forma justa el esfuerzo y responsabilidad de mi puesto.', tipo:'likert' },
+      { id:'g6', text:'¿En qué áreas te gustaría que la agencia te apoyara para crecer profesionalmente?', tipo:'abierta' },
+      { id:'g7', text:'¿Qué tendría que cambiar en la agencia para que quisieras quedarte y crecer aquí a largo plazo?', tipo:'abierta' },
+    ]
+  },
+  {
+    id: 's6', num: 6, emoji: '😊',
+    title: 'Satisfacción General',
+    desc: 'Comparte tu percepción general sobre trabajar en esta agencia.',
+    preguntas: [
+      { id:'s1', text:'En general, me siento satisfecho/a con mi trabajo en esta agencia.', tipo:'likert' },
+      { id:'s2', text:'He pensado seriamente en buscar otro trabajo en los últimos 3 meses.', tipo:'likert', riesgo:true },
+      { id:'s3', text:'Recomendaría esta agencia como un buen lugar para trabajar a alguien de confianza.', tipo:'likert' },
+      { id:'s4', text:'Me siento orgulloso/a de trabajar en esta agencia y de representar la marca Volkswagen.', tipo:'likert' },
+      { id:'s5', text:'Hay días en que vengo a trabajar pero siento que no tiene sentido esforzarme porque igual nada cambia.', tipo:'likert', riesgo:true },
+      { id:'s6', text:'¿Cuál es la razón principal por la que sigues trabajando en esta agencia?', tipo:'abierta' },
+      { id:'s7', text:'Si pudieras hablarle directamente a la gerencia general con total confianza, ¿qué le dirías?', tipo:'abierta' },
+    ]
+  },
+  {
+    id: 's7', num: 7, emoji: '🛡️',
+    title: 'Seguridad Psicológica',
+    desc: 'Esta sección evalúa conductas específicas en el ambiente laboral. Es completamente anónima y está alineada con la NOM-035-STPS-2018.',
+    preguntas: [
+      { id:'p1', text:'Me siento seguro/a de expresar mis ideas o preocupaciones sin temor a burlas o represalias.', tipo:'likert' },
+      { id:'p2', text:'He presenciado o experimentado situaciones donde alguien fue humillado, ignorado sistemáticamente o excluido de forma intencional.', tipo:'likert', riesgo:true },
+      { id:'p3', text:'He recibido comentarios, "bromas" o actitudes que me hicieron sentir incómodo/a, menospreciado/a o poco respetado/a.', tipo:'likert', riesgo:true },
+      { id:'p4', text:'Siento que si reportara un problema de conducta inapropiada, habría consecuencias negativas para mí en lugar de para la persona responsable.', tipo:'likert', riesgo:true },
+      { id:'p5', text:'En esta agencia, todas las personas son tratadas con dignidad independientemente de su puesto, género o antigüedad.', tipo:'likert' },
+      { id:'p6', text:'He observado que alguien fue asignado a tareas menores, ignorado o tratado de forma diferente negativa después de señalar un problema.', tipo:'likert', riesgo:true },
+      { id:'p7', text:'¿Has vivido o presenciado alguna situación que te haya parecido injusta o inapropiada? Descríbela brevemente (sin nombres si no deseas).', tipo:'abierta' },
+      { id:'p8', text:'¿Qué necesitaría cambiar para que te sintieras completamente seguro/a de reportar cualquier problema sin miedo?', tipo:'abierta' },
+    ]
+  },
+  // Sección 8 solo para gerentes
+  {
+    id: 's8', num: 8, emoji: '⭐',
+    title: 'Evaluación: Consultora de Experiencia',
+    desc: 'Esta sección es exclusiva para gerentes y supervisores. Tus respuestas son estrictamente confidenciales y solo las verá el área de RH.',
+    soloGerente: true,
+    preguntas: [
+      { id:'e1', text:'La Consultora de Experiencia proporciona lineamientos y directrices claras que facilitan el trabajo de los departamentos.', tipo:'likert' },
+      { id:'e2', text:'La Consultora de Experiencia es accesible y responde oportunamente cuando se le solicita apoyo o información.', tipo:'likert' },
+      { id:'e3', text:'Las decisiones que toma la Consultora de Experiencia son consistentes, objetivas y basadas en criterios profesionales.', tipo:'likert' },
+      { id:'e4', text:'La Consultora de Experiencia promueve un ambiente de respeto y colaboración entre los diferentes departamentos.', tipo:'likert' },
+      { id:'e5', text:'La Consultora de Experiencia identifica y gestiona adecuadamente los conflictos o problemas que se presentan en la agencia.', tipo:'likert' },
+      { id:'e6', text:'¿Qué fortalezas destacarías de la Consultora de Experiencia en su rol actual?', tipo:'abierta' },
+      { id:'e7', text:'¿Qué áreas de oportunidad identificas en la gestión de la Consultora de Experiencia? (Respuesta confidencial)', tipo:'abierta' },
+    ]
+  }
+];
+
+// IDs de preguntas de riesgo (invierten scoring)
+const RISK_IDS = new Set(['l4','c2','w3','a2','g3','s2','s5','p2','p3','p4','p6']);
+
+// ══════════════════════════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════════════════════════
+let periodoActivo = null;
+let departamento  = '';
+let puesto        = '';
+let seccionActual = 0;
+let seccionesActivas = [];
+let respuestas    = {};   // { questionId: value }
+
+// ══════════════════════════════════════════════════════════
+// UTILIDADES
+// ══════════════════════════════════════════════════════════
+function genCodigo() {
+  return 'VW-' + Math.random().toString(36).toUpperCase().slice(2, 6);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.enc-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function setProgress(current, total) {
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('enc-pb').style.width = pct + '%';
+  document.getElementById('enc-pb-label').textContent = `Sección ${current} de ${total}`;
+  document.getElementById('enc-pb-wrap').style.display = 'block';
+  document.getElementById('enc-pb-label').style.display = 'block';
+}
+
+// ══════════════════════════════════════════════════════════
+// INICIO: verificar periodo activo
+// ══════════════════════════════════════════════════════════
+async function init() {
+  // Verificar duplicado en sesión
+  if (sessionStorage.getItem('clima_completada')) {
+    showScreen('screen-duplicate');
+    return;
+  }
+
+  // Intentar restaurar progreso guardado
+  const savedProgress = sessionStorage.getItem('clima_progress');
+  if (savedProgress) {
+    try {
+      const p = JSON.parse(savedProgress);
+      respuestas = p.respuestas || {};
+      departamento = p.departamento || '';
+      puesto = p.puesto || '';
+    } catch(e) {}
+  }
+
+  try {
+    const q = query(collection(db, 'clima_periodos'), where('activo', '==', true));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      document.getElementById('closed-msg').textContent =
+        'No hay una evaluación activa en este momento. Contacta a tu administrador.';
+      showScreen('screen-closed');
+      return;
+    }
+
+    const periodoDoc = snap.docs[0];
+    periodoActivo = { id: periodoDoc.id, ...periodoDoc.data() };
+
+    // Verificar si el periodo está dentro de fechas
+    const ahora = new Date();
+    if (periodoActivo.fechaFin && periodoActivo.fechaFin.toDate() < ahora) {
+      document.getElementById('closed-msg').textContent =
+        `El periodo "${periodoActivo.nombre}" concluyó el ${periodoActivo.fechaFin.toDate().toLocaleDateString('es-MX')}. Gracias por tu interés.`;
+      showScreen('screen-closed');
+      return;
+    }
+
+    showScreen('screen-welcome');
+  } catch(err) {
+    console.error('[Clima] Error init:', err);
+    document.getElementById('closed-msg').textContent =
+      'Error al conectar con el servidor. Intenta de nuevo más tarde.';
+    showScreen('screen-closed');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// CONSTRUIR SECCIONES ACTIVAS
+// ══════════════════════════════════════════════════════════
+function buildSeccionesActivas() {
+  seccionesActivas = SECCIONES.filter(s => {
+    if (s.soloGerente && puesto !== 'gerente') return false;
+    return true;
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDERIZAR SECCIÓN
+// ══════════════════════════════════════════════════════════
+function renderSeccion(idx) {
+  const sec = seccionesActivas[idx];
+  const container = document.getElementById('survey-section-container');
+  setProgress(idx + 1, seccionesActivas.length);
+
+  let html = `
+    <div class="enc-card">
+      <div class="enc-section-badge">${sec.emoji} Sección ${sec.num}</div>
+      <div class="enc-section-title">${sec.title}</div>
+      <div class="enc-section-desc">${sec.desc}</div>
+  `;
+
+  if (sec.soloGerente) {
+    html += `<div class="enc-alert enc-alert-warn">🔒 Esta sección es confidencial. Solo la verá el área de RH.</div>`;
+  }
+
+  sec.preguntas.forEach((preg, pi) => {
+    html += `<div class="enc-question" id="q-${preg.id}" data-qid="${preg.id}">`;
+    const numLabel = preg.tipo === 'likert' ? `<strong>${pi + 1}.</strong> ` : `<strong>${pi + 1}.</strong> `;
+
+    if (preg.tipo === 'likert') {
+      const cls = preg.riesgo ? ' risk' : '';
+      html += `<div class="enc-question-text${cls}">${numLabel}${preg.text}</div>`;
+      html += `<div class="likert-scale">`;
+      for (let v = 1; v <= 5; v++) {
+        const labels = ['','Totalmente\nen desacuerdo','En\ndesacuerdo','Ni de acuerdo\nni desacuerdo','De\nacuerdo','Totalmente\nde acuerdo'];
+        const sel = respuestas[preg.id] === v ? ' selected' : '';
+        html += `
+          <div class="likert-option">
+            <button class="likert-btn${sel}" data-qid="${preg.id}" data-val="${v}">${v}</button>
+            <div class="likert-label">${labels[v]}</div>
+          </div>`;
+      }
+      html += `</div>`;
+      html += `<div class="enc-error">Por favor selecciona una respuesta.</div>`;
+    } else {
+      const val = respuestas[preg.id] || '';
+      html += `<div class="enc-question-text">${numLabel}${preg.text}</div>`;
+      html += `<textarea class="enc-textarea" data-qid="${preg.id}" placeholder="Escribe tu respuesta aquí…" rows="3">${val}</textarea>`;
+      html += `<div class="enc-optional">Opcional — puedes dejarlo en blanco</div>`;
+    }
+
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
+
+  // Eventos likert
+  container.querySelectorAll('.likert-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const qid = btn.dataset.qid;
+      const val = parseInt(btn.dataset.val);
+      respuestas[qid] = val;
+      container.querySelectorAll(`.likert-btn[data-qid="${qid}"]`).forEach(b => {
+        b.classList.toggle('selected', parseInt(b.dataset.val) === val);
+      });
+      // Quitar error si estaba
+      const qEl = document.getElementById(`q-${qid}`);
+      if (qEl) qEl.classList.remove('has-error');
+      saveProgress();
+    });
+  });
+
+  // Eventos textarea
+  container.querySelectorAll('.enc-textarea').forEach(ta => {
+    ta.addEventListener('input', () => {
+      respuestas[ta.dataset.qid] = ta.value;
+      saveProgress();
+    });
+  });
+
+  // Botones nav
+  document.getElementById('btn-prev').style.display = idx === 0 ? 'none' : 'flex';
+  document.getElementById('btn-next').textContent =
+    idx === seccionesActivas.length - 1 ? '✓ Enviar evaluación' : 'Siguiente →';
+}
+
+// ══════════════════════════════════════════════════════════
+// VALIDAR SECCIÓN ACTUAL (solo preguntas likert)
+// ══════════════════════════════════════════════════════════
+function validarSeccion() {
+  const sec = seccionesActivas[seccionActual];
+  let ok = true;
+  sec.preguntas.filter(p => p.tipo === 'likert').forEach(preg => {
+    const qEl = document.getElementById(`q-${preg.id}`);
+    if (!respuestas[preg.id]) {
+      qEl?.classList.add('has-error');
+      ok = false;
+    }
+  });
+  if (!ok) {
+    // Scroll al primer error
+    document.querySelector('.enc-question.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  return ok;
+}
+
+// ══════════════════════════════════════════════════════════
+// GUARDAR PROGRESO EN SESSION
+// ══════════════════════════════════════════════════════════
+function saveProgress() {
+  sessionStorage.setItem('clima_progress', JSON.stringify({ respuestas, departamento, puesto }));
+}
+
+// ══════════════════════════════════════════════════════════
+// CALCULAR SCORES
+// ══════════════════════════════════════════════════════════
+function calcularScores() {
+  // sectionScores: promedio por sección (usando scoring ajustado para preguntas de riesgo)
+  const sectionScores = seccionesActivas
+    .filter(s => !s.soloGerente)
+    .map(sec => {
+      const likerts = sec.preguntas.filter(p => p.tipo === 'likert');
+      const vals = likerts.map(p => {
+        const v = respuestas[p.id] || 3;
+        return RISK_IDS.has(p.id) ? (6 - v) : v;
+      });
+      return vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : 0;
+    });
+
+  return sectionScores;
+}
+
+// ══════════════════════════════════════════════════════════
+// ENVIAR A FIRESTORE
+// ══════════════════════════════════════════════════════════
+async function enviarEncuesta() {
+  const btn = document.getElementById('btn-next');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando…';
+
+  try {
+    const codigo = genCodigo();
+    const sectionScores = calcularScores();
+
+    const docData = {
+      codigoEvidencia: codigo,
+      timestamp:       Timestamp.now(),
+      departamento,
+      puesto,
+      sectionScores,
+      answers:         { ...respuestas },
+      completada:      true,
+      periodoId:       periodoActivo.id,
+    };
+
+    await addDoc(collection(db, 'clima_evaluaciones'), docData);
+
+    // Registro en evidencias
+    await addDoc(collection(db, 'clima_evidencias'), {
+      codigoEvidencia:       codigo,
+      departamento,
+      puesto,
+      timestampCompletado:   Timestamp.now(),
+      periodoId:             periodoActivo.id,
+      verificada:            false,
+    });
+
+    // Marcar sesión como completada
+    sessionStorage.setItem('clima_completada', '1');
+    sessionStorage.removeItem('clima_progress');
+
+    // Mostrar código
+    document.getElementById('confirm-code').textContent = codigo;
+    showScreen('screen-confirm');
+    document.getElementById('enc-pb-wrap').style.display = 'none';
+    document.getElementById('enc-pb-label').style.display = 'none';
+    document.getElementById('enc-subtitle').textContent = '¡Gracias por tu participación!';
+
+  } catch(err) {
+    console.error('[Clima] Error envío:', err);
+    btn.disabled = false;
+    btn.textContent = '✓ Enviar evaluación';
+    alert('Ocurrió un error al enviar. Por favor intenta de nuevo.');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// EVENTOS
+// ══════════════════════════════════════════════════════════
+document.getElementById('btn-start').addEventListener('click', () => {
+  departamento = document.getElementById('sel-depto').value;
+  puesto = document.getElementById('sel-puesto').value;
+
+  if (!departamento || !puesto) {
+    document.getElementById('welcome-error').style.display = 'flex';
+    return;
+  }
+
+  document.getElementById('welcome-error').style.display = 'none';
+  buildSeccionesActivas();
+  seccionActual = 0;
+  saveProgress();
+  showScreen('screen-survey');
+  renderSeccion(0);
+  window.scrollTo(0, 0);
+});
+
+document.getElementById('btn-next').addEventListener('click', async () => {
+  if (!validarSeccion()) return;
+
+  if (seccionActual < seccionesActivas.length - 1) {
+    seccionActual++;
+    renderSeccion(seccionActual);
+    window.scrollTo(0, 0);
+  } else {
+    await enviarEncuesta();
+  }
+});
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  if (seccionActual > 0) {
+    seccionActual--;
+    renderSeccion(seccionActual);
+    window.scrollTo(0, 0);
+  }
+});
+
+// ══════════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
