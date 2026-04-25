@@ -1,5 +1,5 @@
 // sw.js
-const SW_VERSION = 'gesper-pwa-v2.0.0';
+const SW_VERSION = 'gesper-pwa-v2.0.1';
 const CACHE = [
   '/', '/index.html', '/app.js',
   '/css/tokens.css', '/css/base.css', '/css/components.css',

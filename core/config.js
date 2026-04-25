@@ -6,6 +6,37 @@
 export const APP_NAME  = 'GesPer';
 export const VERSION   = 'v2.0.0';
 
+// ── Compatibilidad con módulos legacy ─────────────────────
+// Los módulos actas/reportes/permisos importan AGENCIA, CIUDAD,
+// SUCURSAL como constantes. En multi-tenant estos valores vienen
+// de la sesión activa. Las exponemos como "constantes" que se
+// evalúan dinámicamente vía toString() en template literals.
+function _readSession() {
+  try { return JSON.parse(localStorage.getItem('gesper_session')) || {}; }
+  catch { return {}; }
+}
+
+function _sucursalNombre() {
+  const s = _readSession();
+  if (!s.sucursales || !s.sucursalId) return '';
+  if (s.sucursalId === 'todas') return 'Todas las sucursales';
+  const suc = s.sucursales.find(x => x.id === s.sucursalId);
+  return suc?.nombre || '';
+}
+
+// Estos objetos heredan de String y reescriben toString() para
+// que los template literals (`${AGENCIA}`) los evalúen al vuelo.
+function _dyn(getter) {
+  const obj = Object.create(String.prototype);
+  obj.toString = getter;
+  obj.valueOf  = getter;
+  return obj;
+}
+
+export const AGENCIA  = _dyn(() => _readSession().empresa?.nombre || 'GesPer');
+export const CIUDAD   = _dyn(() => _readSession().empresa?.ciudad || '');
+export const SUCURSAL = _dyn(_sucursalNombre);
+
 // ── Defaults globales (sobrescritos por config empresa) ───
 export const DEFAULT_BRANDING = {
   nombre: 'GesPer',
